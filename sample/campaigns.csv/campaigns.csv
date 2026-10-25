@@ -1,6 +1,0 @@
-campaign_id,utm_source,utm_medium,utm_campaign,landing_page,owner,start_date
-cmp_1042,Meta,paid-social,meta_paid_social_instamart_q4_launch,https://example.com/collections/weekly-box,Growth,2026-11-01
-cmp_1043,Google,cpc,google_cpc_brand_search_nov,https://example.com/search,Growth,2026-11-03
-cmp_1044,LinkedIn,paid_social,linkedin_paid_social_b2b_data_quality_webinar,http://example.com/webinar,Marketing,2026-11-05
-cmp_1044,Meta,paid_social,meta_paid_social_duplicate_campaign_id,https://example.com/offers,Growth,2026-11-07
-cmp_1045,Email,email,,https://example.com/retention,CRM,2026-11-08
