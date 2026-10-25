@@ -1,0 +1,50 @@
+{
+  "name": "Campaign Tag QA — Review Only",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "campaign-tag-qa",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "5d1a2a81-7551-4d6e-9a4b-b0a17f46cfa1",
+      "name": "Campaign intake",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "growthpulse-campaign-tag-qa"
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $json.body ?? $json;\nconst required = ['campaign_id','utm_source','utm_medium','utm_campaign','landing_page','owner','start_date'];\nconst errors = [];\nconst normalized = { ...payload };\nfor (const key of required) {\n  if (normalized[key] === undefined || normalized[key] === null || String(normalized[key]).trim() === '') errors.push(`Missing required field: ${key}`);\n}\nconst token = value => String(value ?? '').trim().toLowerCase().replace(/[\\s-]+/g, '_').replace(/[^a-z0-9_]+/g, '').replace(/^_+|_+$/g, '');\nnormalized.utm_source = token(normalized.utm_source);\nnormalized.utm_medium = token(normalized.utm_medium);\nnormalized.utm_campaign = token(normalized.utm_campaign);\nconst allowedSources = ['google','meta','tiktok','linkedin','email','affiliate','organic'];\nif (normalized.utm_source && !allowedSources.includes(normalized.utm_source)) errors.push(`Unrecognized utm_source: ${normalized.utm_source}`);\nif (normalized.utm_campaign && !/^[a-z0-9]+(?:_[a-z0-9]+)*$/.test(normalized.utm_campaign)) errors.push('utm_campaign must use lowercase letters, numbers, and underscores');\nif (normalized.landing_page && !String(normalized.landing_page).startsWith('https://')) errors.push('landing_page must use HTTPS');\nif (normalized.start_date && !/^\\d{4}-\\d{2}-\\d{2}$/.test(String(normalized.start_date))) errors.push('start_date must use YYYY-MM-DD');\nreturn [{ json: { valid: errors.length === 0, normalized, errors, action: 'review_only', message: errors.length ? 'Review required; no campaign changes were published.' : 'Checks passed; campaign metadata is ready for human review.' } }];"
+      },
+      "id": "0d10fc4e-e61e-4497-a207-525a3491929a",
+      "name": "Normalize and validate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": { "responseCode": "={{ $json.valid ? 200 : 422 }}" }
+      },
+      "id": "278cf8f1-92cb-4afc-8738-e67d51d1f064",
+      "name": "Return QA result",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [760, 300]
+    }
+  ],
+  "connections": {
+    "Campaign intake": { "main": [[{ "node": "Normalize and validate", "type": "main", "index": 0 }]] },
+    "Normalize and validate": { "main": [[{ "node": "Return QA result", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "f9f38c12-f5d8-49e7-a5f0-c8d4cb8166b3",
+  "meta": { "templateCredsSetupCompleted": true },
+  "tags": []
+}
